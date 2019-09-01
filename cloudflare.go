@@ -19,6 +19,7 @@ func (cf *cf) New() (*cf, error) {
 	return cf, nil
 }
 
+// Update all A records for a given Cloudflare domain (set in .env)
 func (cf *cf) updateAllRecords(ip string) error {
 	// Fetch list of zones for given domain
 	zones, err := cf.api.ListZones(os.Getenv("CF_ZONE_DOMAIN"))
@@ -33,12 +34,14 @@ func (cf *cf) updateAllRecords(ip string) error {
 			return err
 		}
 		for _, record := range records {
+			// Updated record value (updated IP address)
 			updatedRecord := cloudflare.DNSRecord{
 				Type:    "A",
 				Name:    record.Name,
 				Content: ip,
 				Proxied: true,
 			}
+			// Update the records
 			err := cf.api.UpdateDNSRecord(zone.ID, record.ID, updatedRecord)
 			if err != nil {
 				return err
